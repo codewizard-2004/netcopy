@@ -30,17 +30,12 @@ class QueryResponse(BaseModel):
     model: str
 
 
-@app.get("/")
-def root():
-    return {"status": "running", "usage": "curl localhost:8000/ask -d 'your question'"}
-
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
 
-@app.post("/ask")
+@app.post("/")
 async def ask(request: Request):
     content_type = request.headers.get("content-type", "")
 
@@ -60,6 +55,6 @@ async def ask(request: Request):
 
     try:
         result = model.generate_content(query)
-        return QueryResponse(response=result.text, model="gemini-2.0-flash")
+        return QueryResponse(response=result.text, model="gemini-1.5-flash")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gemini API error: {str(e)}")
