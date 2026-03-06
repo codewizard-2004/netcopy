@@ -3,7 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
 
 # Load API key from .env file (falls back to actual env vars if not in .env)
 load_dotenv(dotenv_path=Path(__file__).parent / ".env")
@@ -15,12 +15,12 @@ if not GEMINI_API_KEY:
         "  echo 'GEMINI_API_KEY=your_key_here' > .env"
     )
 
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client(api_key=GEMINI_API_KEY)
+MODEL = "gemini-2.0-flash"
 
 app = FastAPI(
     title="netcopy",
-    description="Query Google Gemini from the terminal: curl localhost:8000/ask -d 'your question'",
+    description="Query Google Gemini from the terminal: curl https://your-app.onrender.com/ask -d 'your question'",
     version="1.0.0",
 )
 
@@ -28,7 +28,6 @@ app = FastAPI(
 class QueryResponse(BaseModel):
     response: str
     model: str
-
 
 @app.get("/health")
 def health():
@@ -50,11 +49,11 @@ async def ask(request: Request):
     if not query:
         raise HTTPException(
             status_code=400,
-            detail="Query cannot be empty. Usage: curl localhost:8000/ask -d 'your question'"
+            detail="Query cannot be empty. Usage: curl /ask -d 'your question'"
         )
 
     try:
-        result = model.generate_content(query)
-        return QueryResponse(response=result.text, model="gemini-1.5-flash")
+        response = client.models.generate_content(model=MODEL, contents=query)
+        return QueryResponse(response=response.text, model=MODEL)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gemini API error: {str(e)}")
