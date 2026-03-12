@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from google import genai
@@ -89,7 +90,7 @@ async def ask_gemini(request: Request):
 
     try:
         response = client.models.generate_content(model=GEMINI_MODEL, contents=query)
-        return QueryResponse(response=response.text, model=GEMINI_MODEL)
+        return PlainTextResponse(content=response.text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gemini API error: {str(e)}")
 
@@ -107,34 +108,54 @@ async def ask_open(request: Request):
             detail="Query cannot be empty. Usage: curl /open -d 'your question'"
         )
 
-    try:
-        async with httpx.AsyncClient() as httpx_client:
-            response = await httpx_client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPEN_ROUTER_API_KEY}",
-                    "HTTP-Referer": "https://netcopy-ai.example.com", # Required by OpenRouter
-                    "X-Title": "netcopy-ai",
-                },
-                json={
-                    "model": OPEN_ROUTER_MODEL,
-                    "messages": [{"role": "user", "content": query}],
-                    "temperature": 0.7,
-                },
-                timeout=60.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-            answer = data["choices"][0]["message"]["content"]
-            return QueryResponse(response=answer, model=OPEN_ROUTER_MODEL)
+    # List of free models to try as fallbacks
+    models_to_try = [
+        "meta-llama/llama-3.3-70b-instruct:free",
+        "google/gemini-2.0-flash-exp:free",
+        "mistralai/pixtral-12b:free",
+        "openrouter/auto" # Fallback to OpenRouter's auto-router
+    ]
 
-    except httpx.HTTPStatusError as e:
-        detail = "OpenRouter API error"
+    last_error = None
+    for model in models_to_try:
         try:
-            error_data = e.response.json()
-            detail = error_data.get("error", {}).get("message", detail)
-        except:
-            pass
-        raise HTTPException(status_code=e.response.status_code, detail=detail)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OpenRouter integration error: {str(e)}")
+            # Strip potential whitespace from the key
+            api_key = OPEN_ROUTER_API_KEY.strip()
+            
+            async with httpx.AsyncClient() as httpx_client:
+                headers = {
+                    "Authorization": f"Bearer {api_key}",
+                    "HTTP-Referer": "https://netcopy-ai.example.com", 
+                    "X-Title": "netcopy-ai",
+                    "Content-Type": "application/json",
+                }
+                
+                response = await httpx_client.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json={
+                        "model": model,
+                        "messages": [{"role": "user", "content": query}],
+                        "temperature": 0.7,
+                    },
+                    timeout=60.0,
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    answer = data["choices"][0]["message"]["content"]
+                    return PlainTextResponse(content=answer)
+                
+                # If we get here, the specific model failed, try the next one
+                last_error = f"Model {model} failed with status {response.status_code}"
+                continue
+
+        except Exception as e:
+            last_error = str(e)
+            continue
+
+    # If all models fail
+    raise HTTPException(
+        status_code=502, 
+        detail=f"All OpenRouter models failed. Last error: {last_error}"
+    )
