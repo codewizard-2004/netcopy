@@ -1,0 +1,3 @@
+TCP - connection oriented and reliable connection. Used in SMTP, FTP etc
+UDP - Unreliable and connectionless service
+
