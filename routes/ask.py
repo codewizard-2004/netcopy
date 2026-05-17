@@ -34,7 +34,7 @@ def _gemini_sync(query: str) -> dict:
             return {"success": False, "error": "Gemini API key not configured", "service": "Gemini"}
 
         response = gemini_client.models.generate_content(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             contents=query
         )
         return {"success": True, "text": response.text, "service": "Gemini"}
