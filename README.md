@@ -52,19 +52,27 @@ curl localhost:8000/help
 curl localhost:8000/        # Also shows help
 ```
 
-### Ask a Question (Code Generation)
+### Ask a Question (General Chat)
 ```bash
-curl -d 'write a python function for factorial' localhost:8000/ask
+curl -d 'explain how a binary search tree works' localhost:8000/ask
 ```
 
 **Save response to file:**
 ```bash
-curl -d 'write a python function for factorial' localhost:8000/ask -o code.py
+curl -d 'explain how a binary search tree works' localhost:8000/ask -o notes.txt
 ```
+
+### Generate Code Only
+```bash
+curl -d 'write a python function for factorial' localhost:8000/code -o code.py
+curl -d 'write a socket server in C for a chat client' localhost:8000/code -o server.c
+```
+
+The `/code` endpoint only returns code output and keeps any explanatory text as comments in the requested language.
 
 **With longer queries:**
 ```bash
-curl -d 'create a REST API endpoint that handles user authentication with JWT tokens' localhost:8000/ask -o auth.py
+curl -d 'create a REST API endpoint that handles user authentication with JWT tokens' localhost:8000/code -o auth.py
 ```
 
 ### List Available Files
@@ -117,14 +125,15 @@ curl localhost:8000/health
 
 ## API Endpoints
 
-| Method | Path               | Description                    |
-|--------|-------------------|--------------------------------|
-| GET    | `/`               | Show help                      |
-| GET    | `/help`           | Show detailed help             |
-| POST   | `/ask`            | Query Gemini/OpenAI            |
-| GET    | `/files`          | List available files           |
-| GET    | `/download/<path>`| Download specific file         |
-| GET    | `/health`         | Health check                   |
+| Method | Path               | Description                                |
+|--------|-------------------|--------------------------------------------|
+| GET    | `/`               | Show help                                  |
+| GET    | `/help`           | Show detailed help                         |
+| POST   | `/ask`            | Query Gemini/OpenAI                        |
+| POST   | `/code`           | Generate code-only output in the target language |
+| GET    | `/files`          | List available files                       |
+| GET    | `/download/<path>`| Download specific file                     |
+| GET    | `/health`         | Health check                               |
 
 ---
 

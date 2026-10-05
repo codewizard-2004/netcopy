@@ -19,6 +19,9 @@ def format_help() -> str:
 Ask a question:
   curl -d 'your question' <url>/ask
 
+Generate code only:
+  curl -d 'write a Python function for factorial' <url>/code -o answer.py
+
 Save output to file:
   curl -d 'your question' <url>/ask -o answer.txt
 
@@ -26,7 +29,8 @@ Save output to file:
 🔗 AVAILABLE ENDPOINTS
 ─────────────────────────────────────────────────────────────────
 
-  /ask              Query 
+  /ask              Query general questions
+  /code             Generate code-only output in the requested language
   /files            List downloadable files
   /download/<file>  Download a specific file
   /health           Health check
