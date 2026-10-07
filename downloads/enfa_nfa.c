@@ -220,3 +220,29 @@ int main()
 
     return 0;
 }
+
+/*
+Enter number of states: 3
+Enter number of input symbols: 2
+Enter the input symbols:
+a b
+
+Enter epsilon transition matrix:
+1 = epsilon transition exists, 0 = no transition
+0 1 0
+0 0 0
+0 0 0
+
+Enter transition matrix for symbol 'a':
+0 0 0
+0 1 0
+0 0 0
+
+Enter transition matrix for symbol 'b':
+0 0 0
+0 0 1
+0 0 0
+
+Enter number of final states: 1
+Enter final states: 2
+*/

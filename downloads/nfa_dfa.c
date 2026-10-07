@@ -276,3 +276,24 @@ int main()
 
     return 0;
 }
+
+/*
+Enter number of states: 3
+Enter number of input symbols: 2
+Enter input symbols:
+a b
+
+Enter transition matrix for symbol 'a':
+1 1 0
+0 0 0
+0 0 0
+
+Enter transition matrix for symbol 'b':
+1 0 0
+0 0 1
+0 0 0
+
+Enter number of final states: 1
+Enter final states:
+2
+*/

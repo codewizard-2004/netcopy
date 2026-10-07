@@ -1,6 +1,6 @@
 # netcopy
 
-Query Google Gemini (with OpenAI fallback) from any terminal with a single curl command — no API keys needed at the prompt. Download files effortlessly. Perfect for code generation and retrieval.
+Query Google Gemini by default, or force OpenAI with a simple `-oai` flag. No API keys needed at the prompt. Download files effortlessly. Perfect for code generation and retrieval.
 
 ---
 
@@ -49,12 +49,18 @@ Or use the provided script:
 ### Get Help
 ```bash
 curl localhost:8000/help
-curl localhost:8000/        # Also shows help
+curl localhost:8000/help/ask
+curl localhost:8000/help/code
+curl localhost:8000/help/files
+curl localhost:8000/help/download
+curl localhost:8000/help/health
+curl localhost:8000/        # Clean home landing page
 ```
 
 ### Ask a Question (General Chat)
 ```bash
 curl -d 'explain how a binary search tree works' localhost:8000/ask
+curl -d '-oai explain how a binary search tree works' localhost:8000/ask
 ```
 
 **Save response to file:**
@@ -66,9 +72,10 @@ curl -d 'explain how a binary search tree works' localhost:8000/ask -o notes.txt
 ```bash
 curl -d 'write a python function for factorial' localhost:8000/code -o code.py
 curl -d 'write a socket server in C for a chat client' localhost:8000/code -o server.c
+curl -d '-oai write a python function for factorial' localhost:8000/code -o code.py
 ```
 
-The `/code` endpoint only returns code output and keeps any explanatory text as comments in the requested language.
+The `/code` endpoint only returns code output and keeps any explanatory text as comments in the requested language. Gemini is used first by default, then OpenAI as fallback unless you force OpenAI with `-oai`.
 
 **With longer queries:**
 ```bash
@@ -129,6 +136,10 @@ curl localhost:8000/health
 |--------|-------------------|--------------------------------------------|
 | GET    | `/`               | Show help                                  |
 | GET    | `/help`           | Show detailed help                         |
+| GET    | `/help/ask`       | Ask endpoint usage and examples            |
+| GET    | `/help/code`      | Code endpoint usage and examples           |
+| GET    | `/help/files`     | File listing usage and examples            |
+| GET    | `/help/download`  | Download usage and examples                |
 | POST   | `/ask`            | Query Gemini/OpenAI                        |
 | POST   | `/code`           | Generate code-only output in the target language |
 | GET    | `/files`          | List available files                       |
@@ -169,6 +180,12 @@ curl -d 'write a socket-based chat server in C' localhost:8000/ask -o server.c
 ### Get Configuration Code
 ```bash
 curl -d 'fastapi cors middleware configuration' localhost:8000/ask
+```
+
+### Force OpenAI for a Request
+```bash
+curl -d '-oai write a python function that reverses a string' localhost:8000/ask
+curl -d '-oai write a python function for factorial' localhost:8000/code -o factorial.py
 ```
 
 ### Download Existing Code and Generate Related Code
