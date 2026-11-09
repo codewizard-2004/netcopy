@@ -1,5 +1,11 @@
 # netcopy
 
+> [!IMPORTANT]
+> **netcopy has been sunset.** As of November 9, 2026, this project is no longer
+> maintained or actively supported. No further features, fixes, dependency
+> updates, or deployment guarantees should be expected. The repository remains
+> available for reference, and you are welcome to fork it for your own use.
+
 Query Google Gemini by default, or force OpenAI with a simple `-oai` flag. No API keys needed at the prompt. Download files effortlessly. Perfect for code generation and retrieval.
 
 ---
